@@ -19,19 +19,13 @@ public final class SoundPlayer
 {
 	public static final String SFX_PATH = "res/sfx/packs/";
 	private static final String BGM = "bgm", START = "start";
-	private static SoundSystem player = new SoundSystem();
+	private static SoundSystem player = null;
 	private static String sfxPack = null;
 	
-	private SoundPlayer() throws SMWException
+	static
 	{
-		throw new SMWException("Cannot instantiate SoundPlayer.");
-	}
-	
-	public static void init()
-	{	
 		try
 		{
-			setSoundFilesPackage(new File(SFX_PATH + sfxPack).toURI().toString());
 			setCodec("ogg", CodecJOgg.class);
 			setCodec("wav", CodecWav.class);
 			addLibrary(LibraryLWJGLOpenAL.class);
@@ -40,6 +34,13 @@ public final class SoundPlayer
 		{
 			e.printStackTrace();
 		}
+		
+		player = new SoundSystem();
+	}
+	
+	private SoundPlayer() throws SMWException
+	{
+		throw new SMWException("Cannot instantiate SoundPlayer.");
 	}
 	
 	public static void setSFXPack(String sfxPack)

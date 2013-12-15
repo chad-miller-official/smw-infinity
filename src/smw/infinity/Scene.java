@@ -49,7 +49,6 @@ public abstract class Scene extends Container implements Runnable
 	{
 		super();
 		
-		SoundPlayer.init();
 		SoundPlayer.setSFXPack(sfxPackName);
 		
 		renderLoop = new Timer("renderLoop");
