@@ -10,7 +10,6 @@ import java.awt.event.MouseListener;
 
 import smw.infinity.RenderStrategy;
 import smw.infinity.Scene;
-import smw.infinity.ScreenManager;
 import smw.infinity.map.Map;
 import smw.infinity.map.MapCanvas;
 import smw.infinity.map.Tile;
@@ -20,6 +19,8 @@ public class LevelEditorScene extends Scene
 	private static final long serialVersionUID = -7938914211151252837L;
 	private Map map;
 	private byte layer;
+	
+	private ScrollPane tilesetsPane;
 	
 	private MapCanvas mapCanvas;
 	private TilesetViewer tilesetViewer;
@@ -32,20 +33,27 @@ public class LevelEditorScene extends Scene
 		map = new Map(25, 20);
 		updatables.add(map);
 		
+		rs = new RenderStrategy() {
+			@Override
+			public void render(Graphics g)
+			{
+				mapCanvas.render(g, LevelEditorScene.this);
+				tilesetViewer.render(g, tilesetsPane);
+			}
+		};
+	}
+	
+	@Override
+	protected void init()
+	{
+		super.init();
+		
 		EventQueue.invokeLater(new Runnable() {
 			@Override
 			public void run()
 			{
-				final ScrollPane tilesetsPane = new ScrollPane();
-				
-				rs = new RenderStrategy() {
-					@Override
-					public void drawAll(Graphics g)
-					{
-						mapCanvas.render(g, LevelEditorScene.this);
-						tilesetViewer.render(g, tilesetsPane);
-					}
-				};
+				/* GUI DECLARATIONS */
+				tilesetsPane = new ScrollPane();
 				
 				/* COMPONENT DECLARATIONS */
 				mapCanvas = new MapCanvas(map);
@@ -98,7 +106,7 @@ public class LevelEditorScene extends Scene
 				
 				tilesetViewer = new TilesetViewer();
 				
-				/* SET UP SCENE */
+				/* SET UP GUI */
 				tilesetsPane.add(tilesetViewer);
 				tilesetsPane.setSize(new Dimension(256, 640));
 				tilesetsPane.getVAdjustable().setUnitIncrement(Tile.TILE_SIZE / 3);
@@ -112,21 +120,6 @@ public class LevelEditorScene extends Scene
 				
 				updatables.add(mapCanvas);
 				updatables.add(tilesetViewer);
-			}
-		});
-	}
-	
-	@Override
-	protected void preLoop()
-	{
-		super.preLoop();
-		
-		EventQueue.invokeLater(new Runnable() {
-			@Override
-			public void run()
-			{
-				ScreenManager.setTitle("SMW Infinity - Level Editor");
-				ScreenManager.setWindowed();
 			}
 		});
 	}

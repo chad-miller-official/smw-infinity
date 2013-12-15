@@ -6,29 +6,28 @@ public final class Version implements Serializable
 {
 	private static final long serialVersionUID = -3418229852179577302L;
 	
-	public static final byte CURRENT_VERSION = 1;	//0.1
+	public static final byte CURRENT_REVISION_MINOR = 1;
+	public static final byte CURRENT_REVISION_MAJOR = 0;
 	public static final char CURRENT_BUILD = 'A';
 
-	/* First four bits represents major revision; last four bits represents minor revision */
-	private byte version;
-	
-	/* Letters A-Z, as a number corresponding to its position in the ASCII table */
+	private byte minorRevision, majorRevision;
 	private char build;
 	
-	public Version(byte version, char build)
+	public Version(byte minorRevision, byte majorRevision, char build)
 	{
-		this.version = version;
+		this.minorRevision = minorRevision;
+		this.majorRevision = majorRevision;
 		this.build = build;
 	}
 	
 	public byte getMajorRevision()
 	{
-		return (byte) ((version & 0xF0) >>> 4);
+		return majorRevision;
 	}
 	
 	public byte getMinorRevision()
 	{
-		return (byte) (version & 0xF);
+		return minorRevision;
 	}
 	
 	public char getBuild()
@@ -41,7 +40,9 @@ public final class Version implements Serializable
 	{
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + version;
+		result = prime * result + build;
+		result = prime * result + majorRevision;
+		result = prime * result + minorRevision;
 		return result;
 	}
 
@@ -59,15 +60,21 @@ public final class Version implements Serializable
 		
 		Version other = (Version) obj;
 		
-		if(version != other.version)
+		if(build != other.build)
+			return false;
+		
+		if(majorRevision != other.majorRevision)
+			return false;
+		
+		if(minorRevision != other.minorRevision)
 			return false;
 		
 		return true;
 	}
-	
+
 	@Override
 	public String toString()
 	{
-		return (getMajorRevision() + "." + getMinorRevision() + getBuild());
+		return (majorRevision + "." + minorRevision + build);
 	}
 }

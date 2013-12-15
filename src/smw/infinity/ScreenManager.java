@@ -17,29 +17,22 @@ public final class ScreenManager
 	public static final int DEFAULT_WINDOW_WIDTH = 800, DEFAULT_WINDOW_HEIGHT = 640;
 	public static final Dimension DEFAULT_DIMENSION = new Dimension(DEFAULT_WINDOW_WIDTH, DEFAULT_WINDOW_HEIGHT);
 	
-	private static boolean alreadyInit = false;
+	private static Frame frame = null;
+	private static GraphicsDevice videoCard = null;
+	private static BufferStrategy bs = null;
+	private static DisplayMode defaultMode = null, preferredMode = null;
+	private static ScreenMode screenMode = ScreenMode.UNINIT;
 	
-	private static Frame frame;
-	private static GraphicsDevice videoCard;
-	private static BufferStrategy bs;
-	private static DisplayMode defaultMode, preferredMode;
-	private static boolean fullscreen;
-	
-	private static Scene currentScene;
+	private static Scene currentScene = null;
 	
 	private ScreenManager() throws SMWException
 	{
 		throw new SMWException("Cannot instantiate ScreenManager.");
 	}
 	
-	public static void init(final String title)
+	public static void init()
 	{
-		if(alreadyInit)
-			return;
-		
-		alreadyInit = true;
-		GraphicsEnvironment e = GraphicsEnvironment.getLocalGraphicsEnvironment();
-		videoCard = e.getDefaultScreenDevice();
+		videoCard = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
 		defaultMode = videoCard.getDisplayMode();
 		
 		DisplayMode[] modes = { new DisplayMode(DEFAULT_WINDOW_WIDTH, DEFAULT_WINDOW_HEIGHT, 32, DisplayMode.REFRESH_RATE_UNKNOWN),
@@ -62,7 +55,7 @@ public final class ScreenManager
 		
 		currentScene = null;
 		
-		frame = new Frame(title);
+		frame = new Frame();
 		frame.setResizable(false);
 		frame.setFocusable(true);
 		frame.setIgnoreRepaint(true);
@@ -116,7 +109,7 @@ public final class ScreenManager
 	
 	public static void setFullscreen() throws SMWException
 	{
-		if(fullscreen && bs != null)
+		if(screenMode == ScreenMode.FULLSCREEN)
 			return;
 		
 		if(!videoCard.isFullScreenSupported())
@@ -142,13 +135,13 @@ public final class ScreenManager
 		
 		videoCard.getFullScreenWindow().createBufferStrategy(3);
 		bs = videoCard.getFullScreenWindow().getBufferStrategy();
-		fullscreen = true;
+		screenMode = ScreenMode.FULLSCREEN;
 		videoCard.getFullScreenWindow().revalidate();
 	}
 	
 	public static void setWindowed()
 	{
-		if(!fullscreen && bs != null)
+		if(screenMode == ScreenMode.WINDOWED)
 			return;
 		
 		if(videoCard.isDisplayChangeSupported())
@@ -164,13 +157,13 @@ public final class ScreenManager
 		
 		frame.createBufferStrategy(3);
 		bs = frame.getBufferStrategy();
-		fullscreen = false;
+		screenMode = ScreenMode.WINDOWED;
 		frame.revalidate();
 	}
 	
 	public static boolean isFullscreen()
 	{
-		return fullscreen;
+		return (screenMode == ScreenMode.FULLSCREEN);
 	}
 	
 	public static Graphics getGraphics()
@@ -184,7 +177,7 @@ public final class ScreenManager
 			return;
 		
 		Graphics g = bs.getDrawGraphics();
-		rs.drawAll(g);
+		rs.render(g);
 		bs.show();
 		g.dispose();
 	}
@@ -243,5 +236,12 @@ public final class ScreenManager
 	{
 		dispose();
 		super.finalize();
+	}
+	
+	private enum ScreenMode
+	{
+		FULLSCREEN,
+		WINDOWED,
+		UNINIT;
 	}
 }

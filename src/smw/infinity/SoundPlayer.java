@@ -15,21 +15,19 @@ import paulscode.sound.codecs.CodecJOgg;
 import paulscode.sound.codecs.CodecWav;
 import paulscode.sound.libraries.LibraryLWJGLOpenAL;
 
-public class SoundPlayer
+public final class SoundPlayer
 {
 	public static final String SFX_PATH = "res/sfx/packs/";
 	private static final String BGM = "bgm", START = "start";
-	private SoundSystem player;
-	private String sfxPack;
+	private static SoundSystem player = new SoundSystem();
+	private static String sfxPack = null;
 	
-	public SoundPlayer(String sfxPack)
+	private SoundPlayer() throws SMWException
 	{
-		this.sfxPack = sfxPack;
-		init();
-		player = new SoundSystem();
+		throw new SMWException("Cannot instantiate SoundPlayer.");
 	}
 	
-	private void init()
+	public static void init()
 	{	
 		try
 		{
@@ -44,13 +42,13 @@ public class SoundPlayer
 		}
 	}
 	
-	public void setSFXPack(String sfxPack)
+	public static void setSFXPack(String sfxPack)
 	{
 		setSoundFilesPackage(new File(SFX_PATH + sfxPack).toURI().toString());
-		this.sfxPack = sfxPack;
+		SoundPlayer.sfxPack = sfxPack;
 	}
 	
-	public void playSound(String sound)
+	public static void playSound(String sound)
 	{
 		if(player.playing(sound))
 		{
@@ -67,12 +65,12 @@ public class SoundPlayer
 			player.play(sound);
 	}
 	
-	public void stopSound(String sound)
+	public static void stopSound(String sound)
 	{
 		player.stop(sound);
 	}
 	
-	public void playMusic(File music, boolean loop)
+	public static void playMusic(File music, boolean loop)
 	{
 		try
 		{
@@ -84,7 +82,7 @@ public class SoundPlayer
 		}
 	}
 	
-	public void playMusic(File start, final File loop)
+	public static void playMusic(File start, final File loop)
 	{
 		try
 		{
@@ -106,7 +104,7 @@ public class SoundPlayer
 		}).start();
 	}
 	
-	public void stopMusic()
+	public static void stopMusic()
 	{
 		if(player.playing(START))
 			player.stop(START);
@@ -115,12 +113,12 @@ public class SoundPlayer
 			player.stop(BGM);
 	}
 	
-	public void restartMusic()
+	public static void restartMusic()
 	{
 		player.play(BGM);
 	}
 	
-	public void close()
+	public static void close()
 	{
 		if(player != null)
 			player.cleanup();

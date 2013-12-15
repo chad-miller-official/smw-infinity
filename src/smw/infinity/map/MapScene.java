@@ -2,6 +2,7 @@ package smw.infinity.map;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.EventQueue;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.io.File;
@@ -20,7 +21,6 @@ import smw.infinity.Interaction;
 import smw.infinity.InteractionQueue;
 import smw.infinity.RenderStrategy;
 import smw.infinity.Scene;
-import smw.infinity.ScreenManager;
 import smw.infinity.entity.Entity;
 
 public class MapScene extends Scene
@@ -55,7 +55,7 @@ public class MapScene extends Scene
 		
 		rs = new RenderStrategy() {
 			@Override
-			public void drawAll(Graphics g)
+			public void render(Graphics g)
 			{
 				mapCanvas.render(g, MapScene.this);
 				Graphics2D g2D = (Graphics2D) g;
@@ -71,11 +71,6 @@ public class MapScene extends Scene
 		mapPixelWidth = map.getPixelWidth();
 		mapPixelHeight = map.getPixelHeight();
 		
-		mapCanvas = new MapCanvas(map);
-		updatables.add(mapCanvas);
-		
-		add(mapCanvas, BorderLayout.CENTER);
-		
 		interactionLoop = new Timer("interactionLoop");
 		interactionLoop.scheduleAtFixedRate(new TimerTask() {
 			@Override
@@ -90,14 +85,6 @@ public class MapScene extends Scene
 	}
 	
 	@Override
-	protected void preLoop()
-	{
-		super.preLoop();
-		ScreenManager.setTitle("Super Mario War: Infinity");
-		ScreenManager.setWindowed();
-	}
-	
-	@Override
 	public void forceStop()
 	{
 		super.forceStop();
@@ -105,9 +92,26 @@ public class MapScene extends Scene
 	}
 	
 	@Override
-	protected void sceneLoop(long timePassed)
+	protected void init()
 	{
-		super.sceneLoop(timePassed);
+		super.init();
+		
+		EventQueue.invokeLater(new Runnable() {
+			@Override
+			public void run()
+			{
+				mapCanvas = new MapCanvas(map);
+				updatables.add(mapCanvas);
+				
+				add(mapCanvas, BorderLayout.CENTER);
+			}
+		});
+	}
+	
+	@Override
+	protected void loop(long timePassed)
+	{
+		super.loop(timePassed);
 		
 		while(!interactions.isEmpty())
 			interactions.poll().interact();

@@ -19,11 +19,10 @@ public abstract class Scene extends Container implements Runnable
 	private static final long serialVersionUID = 1457116440924270037L;
 	protected static final long FRAME_DELAY = 16, TIMER_DELAY = 1000;
 	
-	public static UncaughtExceptionHandler ue = new SMWUncaughtExceptionHandler();
+	public static UncaughtExceptionHandler uncaughtExceptionHandler = new SMWUncaughtExceptionHandler();
 	
-	protected static String texturePackName = "SMW", musicPackName = "SMW", sfxPackName = "Classic";
+	protected static String gfxPackName = "SMW", musicPackName = "SMW", sfxPackName = "Classic";
 	protected static BitmapFont font;
-	protected static SoundPlayer sound;
 	
 	protected boolean running;
 	protected Timer renderLoop;
@@ -35,7 +34,6 @@ public abstract class Scene extends Container implements Runnable
 	static
 	{
 		Utility.checkLWJGL();
-		sound = new SoundPlayer(sfxPackName);
 		
 		try
 		{
@@ -51,6 +49,9 @@ public abstract class Scene extends Container implements Runnable
 	{
 		super();
 		
+		SoundPlayer.init();
+		SoundPlayer.setSFXPack(sfxPackName);
+		
 		renderLoop = new Timer("renderLoop");
 		renderLoop.scheduleAtFixedRate(new TimerTask() {
 			@Override
@@ -65,16 +66,23 @@ public abstract class Scene extends Container implements Runnable
 				});
 			}
 		}, TIMER_DELAY, FRAME_DELAY);
-		
+	}
+	
+	protected void init()
+	{
 		EventQueue.invokeLater(new Runnable() {
 			@Override
 			public void run()
 			{
-				ScreenManager.init("");
 				setIgnoreRepaint(true);
 				setLayout(new BorderLayout());
 				setPreferredSize(ScreenManager.DEFAULT_DIMENSION);
 				setEnabled(true);
+				
+				ScreenManager.init();
+				ScreenManager.setScene(Scene.this);
+				ScreenManager.pack();
+				ScreenManager.setWindowed();
 			}
 		});
 	}
@@ -90,23 +98,10 @@ public abstract class Scene extends Container implements Runnable
 		return running;
 	}
 
-	protected void preLoop()
-	{
-		EventQueue.invokeLater(new Runnable() {
-			@Override
-			public void run()
-			{
-				ScreenManager.setScene(Scene.this);
-				ScreenManager.pack();
-			}
-		});
-	}
-
 	@Override
 	public void run()
 	{
-		preLoop();
-		
+		init();
 		running = true;
 		long startTime = System.currentTimeMillis(), totalTime = startTime, timePassed;
 		
@@ -115,7 +110,7 @@ public abstract class Scene extends Container implements Runnable
 			timePassed = System.currentTimeMillis() - totalTime;
 			totalTime += timePassed;
 
-			sceneLoop(timePassed);
+			loop(timePassed);
 			
 			try
 			{
@@ -128,15 +123,21 @@ public abstract class Scene extends Container implements Runnable
 		}
 	}
 	
-	protected void sceneLoop(long timePassed)
+	protected void loop(final long timePassed)
 	{
-		for(Updatable u : updatables)
-			u.update(timePassed);
+		EventQueue.invokeLater(new Runnable() {
+			@Override
+			public void run()
+			{
+				for(Updatable u : updatables)
+					u.update(timePassed);
+			}
+		});
 	}
 	
 	public static void quit()
 	{
-		sound.close();
+		SoundPlayer.close();
 		ScreenManager.dispose();
 		System.out.println(Utility.lang.get("credits"));
 		System.out.println(Utility.lang.get("extra credits"));
