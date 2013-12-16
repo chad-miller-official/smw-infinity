@@ -1,158 +1,96 @@
 package smw.infinity.map;
 
-import java.awt.BorderLayout;
-import java.awt.Color;
 import java.awt.EventQueue;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
-import java.io.File;
-import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.Timer;
-import java.util.TimerTask;
-import java.util.concurrent.ConcurrentLinkedQueue;
 
-import javax.imageio.ImageIO;
-
-import smw.infinity.BitmapFont;
 import smw.infinity.Drawable;
 import smw.infinity.Interaction;
 import smw.infinity.InteractionQueue;
 import smw.infinity.RenderStrategy;
 import smw.infinity.Scene;
+import smw.infinity.Updatable;
 import smw.infinity.entity.Entity;
 
 public class MapScene extends Scene
 {
-	private static final long serialVersionUID = 7095409016543341853L;
-
-	private static Set<Entity> entities = new HashSet<Entity>();
-	private static ConcurrentLinkedQueue<Runnable> eventQueue = new ConcurrentLinkedQueue<Runnable>();
-	private static InteractionQueue interactions = new InteractionQueue();
-	private Timer interactionLoop;
+	private static final long serialVersionUID = -2917820952939407626L;
 	
-	public static Map map = new Map(25, 20);
+	public static Map map = null;
 	public static int mapPixelWidth = 0, mapPixelHeight = 0;
-	private static BitmapFont score;
-	private MapCanvas mapCanvas;
-		
-	static
-	{
-		try
-		{
-			score = new BitmapFont(ImageIO.read(new File("res/gfx/fonts/score.png")), "0123456789", new Color(255, 0, 255));
-		}
-		catch(IOException e)
-		{
-			e.printStackTrace();
-		}
-	}
+	
+	private static volatile Set<Drawable> drawables = new HashSet<Drawable>();
+	private static volatile Set<Updatable> updatables = new HashSet<Updatable>();
+	private static volatile Set<Entity> entities = new HashSet<Entity>();
+	
+	private static InteractionQueue interactions = new InteractionQueue();
 	
 	public MapScene(Map map)
 	{
 		super();
 		
-		rs = new RenderStrategy() {
+		MapScene.map = map;
+		mapPixelWidth = map.getPixelWidth();
+		mapPixelHeight = map.getPixelHeight();
+	}
+
+	@Override
+	protected RenderStrategy createRenderStrategy()
+	{
+		return new RenderStrategy() {
 			@Override
 			public void render(Graphics g)
 			{
-				mapCanvas.render(g, MapScene.this);
 				Graphics2D g2D = (Graphics2D) g;
 				
-				for(Drawable d : drawables)
-					d.drawToScreen(g2D, MapScene.this);
+				for(Entity e : entities)
+					e.drawToScreen(g2D, MapScene.this);
 				
 				g2D.dispose();
 			}
 		};
-		
-		MapScene.map = map;
-		mapPixelWidth = map.getPixelWidth();
-		mapPixelHeight = map.getPixelHeight();
-		
-		interactionLoop = new Timer("interactionLoop");
-		interactionLoop.scheduleAtFixedRate(new TimerTask() {
-			@Override
-			public void run()
-			{
-				for(Entity e1 : entities)
-					for(Entity e2 : entities)
-						if(e1 != e2 && e1.intersects(e2))
-							queueInteraction(new Interaction(e1, e2));
-			}
-		}, TIMER_DELAY, FRAME_DELAY);
 	}
-	
+
 	@Override
-	public void forceStop()
+	public void init()
 	{
-		super.forceStop();
-		interactionLoop.cancel();
+		//TODO
 	}
-	
+
 	@Override
-	protected void init()
+	protected void update(final long timePassed)
 	{
-		super.init();
-		
 		EventQueue.invokeLater(new Runnable() {
 			@Override
 			public void run()
 			{
-				mapCanvas = new MapCanvas(map);
-				updatables.add(mapCanvas);
+				while(!interactions.isEmpty())
+					interactions.poll().interact();
 				
-				add(mapCanvas, BorderLayout.CENTER);
+				for(Updatable u : updatables)
+					u.update(timePassed);
 			}
 		});
 	}
 	
-	@Override
-	protected void loop(long timePassed)
+	public static void addEntity(Entity e)
 	{
-		super.loop(timePassed);
-		
-		while(!interactions.isEmpty())
-			interactions.poll().interact();
-		
-		while(!eventQueue.isEmpty())
-			eventQueue.poll().run();
+		entities.add(e);
+		updatables.add(e);
+		drawables.add(e);
 	}
 	
-	public static void queueInteraction(Interaction i)
+	public static void removeEntity(Entity e)
+	{
+		entities.remove(e);
+		updatables.remove(e);
+		drawables.remove(e);
+	}
+	
+	public static void enqueueInteraction(Interaction i)
 	{
 		interactions.offer(i);
-	}
-	
-	public static void queueEvent(Runnable r)
-	{
-		eventQueue.offer(r);
-	}
-	
-	public static void addEntity(final Entity e)
-	{
-		queueEvent(new Runnable() {
-			@Override
-			public void run()
-			{
-				entities.add(e);
-				drawables.add(e);
-				updatables.add(e);
-			}
-		});
-	}
-	
-	public static void removeEntity(final Entity e)
-	{
-		queueEvent(new Runnable() {
-			@Override
-			public void run()
-			{
-				entities.remove(e);
-				drawables.remove(e);
-				updatables.remove(e);
-			}
-		});
 	}
 }

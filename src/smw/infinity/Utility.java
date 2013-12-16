@@ -12,6 +12,7 @@ public final class Utility
 {
 	public static final byte HALF_RAD = 1, RAD = 2, THREEHALFS_RAD = 3;
 	public static Properties lang;
+	public static SMWUncaughtExceptionHandler exHandler = new SMWUncaughtExceptionHandler();
 	
 	static
 	{	
@@ -96,7 +97,7 @@ public final class Utility
 		}
 	}
 	
-	public static void checkLWJGL()
+	public static void initLWJGL()
 	{
 		String os = null;
 		String opSystem = System.getProperty("os.name").toLowerCase();

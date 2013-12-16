@@ -17,8 +17,10 @@ import paulscode.sound.libraries.LibraryLWJGLOpenAL;
 
 public final class SoundPlayer
 {
+	private static final String BGM = "BGM", START = "START";
 	public static final String SFX_PATH = "res/sfx/packs/";
-	private static final String BGM = "bgm", START = "start";
+	public static final String MUSIC_PATH = "res/music/";
+	
 	private static SoundSystem player = null;
 	private static String sfxPack = null;
 	
@@ -87,7 +89,7 @@ public final class SoundPlayer
 	{
 		try
 		{
-			player.backgroundMusic(START, start.toURI().toURL(), "ogg", false);
+			player.backgroundMusic(BGM, start.toURI().toURL(), "ogg", false);
 		}
 		catch (MalformedURLException e)
 		{
@@ -105,7 +107,7 @@ public final class SoundPlayer
 		}).start();
 	}
 	
-	public static void stopMusic()
+	public static void stopSound()
 	{
 		if(player.playing(START))
 			player.stop(START);

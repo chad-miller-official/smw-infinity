@@ -6,7 +6,6 @@ import java.awt.Frame;
 import java.awt.Graphics;
 import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
-import java.awt.Toolkit;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.awt.image.BufferStrategy;
@@ -59,6 +58,7 @@ public final class ScreenManager
 		frame.setResizable(false);
 		frame.setFocusable(true);
 		frame.setIgnoreRepaint(true);
+		frame.setSize(DEFAULT_DIMENSION);
 		
 		frame.addWindowListener(new WindowListener() {
 			@Override
@@ -72,7 +72,12 @@ public final class ScreenManager
 			{
 				setScene(null);
 				dispose();
-				Scene.quit();
+				
+				SoundPlayer.close();
+				ScreenManager.dispose();
+				System.out.println(Utility.lang.get("credits"));
+				System.out.println(Utility.lang.get("extra credits"));
+				System.exit(0);
 			}
 
 			@Override
@@ -148,8 +153,8 @@ public final class ScreenManager
 			videoCard.setDisplayMode(defaultMode);
 		
 		videoCard.setFullScreenWindow(null);
-		Dimension d = Toolkit.getDefaultToolkit().getScreenSize();
-		frame.setLocation((d.width - frame.getWidth()) / 2, ((d.height - frame.getHeight()) / 2) - 16);
+		//Dimension d = Toolkit.getDefaultToolkit().getScreenSize();
+		//frame.setLocation((d.width - frame.getWidth()) / 2, ((d.height - frame.getHeight()) / 2) - 16);
 		frame.setVisible(true);
 		
 		if(bs != null)
@@ -202,7 +207,7 @@ public final class ScreenManager
 	{
 		if(currentScene != null)
 		{
-			currentScene.forceStop();
+			currentScene.stop();
 			frame.remove(currentScene);
 		}
 		

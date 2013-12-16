@@ -10,7 +10,6 @@ import smw.infinity.Drawable;
 public class Tile implements Cloneable, Drawable, Serializable
 {
 	private static final long serialVersionUID = 4076294701172277068L;
-	public static String TILESETS_PATH = "res/gfx/tilesets/";
 	public static byte TILE_SIZE = 32;
 	protected transient BufferedImage tile;
 	protected int tilesetX, tilesetY;

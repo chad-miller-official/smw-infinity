@@ -20,6 +20,7 @@ import smw.infinity.Drawable;
 public class Tileset implements Drawable
 {
 	public static Hashtable<String, Tileset> tilesets = new Hashtable<String, Tileset>();
+	
 	public static final String TILESET_DIR = "res/gfx/tilesets/";
 	protected String tilesetName;
 	protected TileType[][] types;

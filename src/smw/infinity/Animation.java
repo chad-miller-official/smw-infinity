@@ -11,38 +11,29 @@ public class Animation implements Cloneable, Drawable, Updatable
 	private int currentFrame;
 	private long countTime, totalTime;
 	private long frameRate;
-	private int width, height;
 	
 	public Animation(long frameRate, BufferedImage... images) throws SMWException
 	{
 		frames = new Frame[images.length];
 		
 		for(int i = 1; i <= images.length; i++)
-		{
-			if(i < images.length)
-				if(images[i].getWidth() != images[i - 1].getWidth() && images[i].getHeight() != images[i - 1].getHeight())
-					throw new SMWException("All images must have the same dimensions.");
-			
+		{			
 			totalTime += frameRate;
 			frames[i] = new Frame(images[i - 1], totalTime);
 		}
 		
-		width = images[0].getWidth();
-		height = images[0].getHeight();
 		countTime = totalTime = 0;
 		currentFrame = 0;
 		this.frameRate = frameRate;
 	}
 	
-	private Animation(Frame[] frames, int currentFrame, long countTime, long totalTime, long frameRate, int width, int height)
+	private Animation(Frame[] frames, int currentFrame, long countTime, long totalTime, long frameRate)
 	{
 		this.frames = Arrays.copyOf(frames, frames.length);
 		this.currentFrame = currentFrame;
 		this.countTime = countTime;
 		this.totalTime = totalTime;
 		this.frameRate = frameRate;
-		this.width = width;
-		this.height = height;
 	}
 	
 	public void update(long timePassed)
@@ -87,20 +78,10 @@ public class Animation implements Cloneable, Drawable, Updatable
 		countTime = currentFrame = 0;
 	}
 	
-	public int getWidth()
-	{
-		return width;
-	}
-	
-	public int getHeight()
-	{
-		return height;
-	}
-	
 	@Override
 	public Object clone()
 	{
-		return new Animation(frames, currentFrame, countTime, totalTime, frameRate, width, height);
+		return new Animation(frames, currentFrame, countTime, totalTime, frameRate);
 	}
 	
 	public long getFrameRate()
@@ -143,9 +124,7 @@ public class Animation implements Cloneable, Drawable, Updatable
 		result = prime * result + (int) (countTime ^ (countTime >>> 32));
 		result = prime * result + currentFrame;
 		result = prime * result + (int) (frameRate ^ (frameRate >>> 32));
-		result = prime * result + height;
 		result = prime * result + (int) (totalTime ^ (totalTime >>> 32));
-		result = prime * result + width;
 		return result;
 	}
 
@@ -172,13 +151,7 @@ public class Animation implements Cloneable, Drawable, Updatable
 		if(frameRate != other.frameRate)
 			return false;
 		
-		if(height != other.height)
-			return false;
-		
 		if(totalTime != other.totalTime)
-			return false;
-		
-		if(width != other.width)
 			return false;
 		
 		return true;

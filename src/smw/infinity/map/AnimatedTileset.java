@@ -17,7 +17,7 @@ import smw.infinity.Updatable;
 public class AnimatedTileset extends Tileset implements Updatable
 {
 	public static final String ANIM_TILESET_DIR = "res/gfx/tilesets/anim/";
-	public static final long ANIM_TILESET_RATE = 250;
+	public static final long BASE_ANIM_TILESET_RATE = 250;
 	protected Animation tilesetAnim;
 	
 	public AnimatedTileset(String tilesetName)
@@ -39,7 +39,7 @@ public class AnimatedTileset extends Tileset implements Updatable
 				f = new File(ANIM_TILESET_DIR + tilesetName + "/" + (i + 1) + ".png");
 			}
 			
-			tilesetAnim = new Animation(ANIM_TILESET_RATE, (BufferedImage[]) img.toArray());
+			tilesetAnim = new Animation(BASE_ANIM_TILESET_RATE, (BufferedImage[]) img.toArray());
 			tileset = tilesetAnim.getImage();
 			ObjectInputStream in = new ObjectInputStream(new FileInputStream(new File(ANIM_TILESET_DIR + tilesetName + "/tileset.tls")));
 			types = (TileType[][]) in.readObject();
