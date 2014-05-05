@@ -2,6 +2,7 @@ package smw.infinity;
 
 import java.awt.Canvas;
 import java.awt.Dimension;
+import java.awt.EventQueue;
 import java.awt.Frame;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
@@ -31,19 +32,21 @@ public final class ScreenManager
 	private static Canvas canvas = null;
 	private static BufferStrategy buffer = null;
 	
-	private static Scene currentScene = null;		//there has got to be a better way to do this
+	private static Scene currentScene = null;
 	
 	private ScreenManager() throws SMWException
 	{
 		throw new SMWException("Can't instantiate ScreenManager!");
 	}
 	
-	public static void init()
+	public static void init(Scene sc)
 	{
+		currentScene = sc;
+		
 		graphicsCard = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
 		graphicsConfig = graphicsCard.getDefaultConfiguration();
 		
-		frame = new Frame();
+		frame = new Frame(sc.getTitle());
 		frame.setResizable(false);
 		frame.setFocusable(true);
 		frame.setIgnoreRepaint(true);
@@ -69,7 +72,13 @@ public final class ScreenManager
 				
 				while(currentScene.isRunning());
 				
-				dispose();
+				EventQueue.invokeLater(new Runnable() {
+					@Override
+					public void run()
+					{
+						dispose();
+					}
+				});
 			}
 
 			@Override
@@ -147,9 +156,9 @@ public final class ScreenManager
 		return toReturn;
 	}
 	
-	public static void setCurrentScene(Scene s)
+	public static void start()
 	{
-		currentScene = s;
+		currentScene.start();
 	}
 	
 	public static void dispose()

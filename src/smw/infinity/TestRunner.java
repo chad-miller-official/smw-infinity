@@ -1,18 +1,25 @@
 package smw.infinity;
 
 import java.awt.Color;
+import java.awt.EventQueue;
 import java.awt.Graphics2D;
 
 public class TestRunner
 {
 	public static void main(String[] args)
 	{
-		Scene s = new Scene();
+		Scene s = new Scene("Test");
 		s.addDrawable(new TestDrawable());
-		s.run();
-		ScreenManager.init();
-		ScreenManager.setCurrentScene(s);
-		ScreenManager.setVisible(true);
+		
+		EventQueue.invokeLater(new Runnable() {
+			@Override
+			public void run()
+			{
+				ScreenManager.init(s);
+				ScreenManager.setVisible(true);
+				ScreenManager.start();
+			}
+		});
 	}
 	
 	private static class TestDrawable implements Drawable

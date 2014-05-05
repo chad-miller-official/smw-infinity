@@ -6,9 +6,11 @@ import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
 
-public class Scene implements Runnable
+public /*abstract*/ class Scene
 {
-	protected static final long BASE_TIMER_DELAY = 1000, FRAME_DELAY = 16;
+	protected String title;
+	
+	protected static final long BASE_TIMER_DELAY = 100, FRAME_DELAY = 16;
 	protected Set<Updatable> updatables;
 	protected Set<Drawable> drawables;
 	
@@ -17,9 +19,11 @@ public class Scene implements Runnable
 	
 	protected boolean running;
 	
-	public Scene()
+	public Scene(String title)
 	{
 		running = false;
+		
+		this.title = title;
 		updatables = new HashSet<Updatable>();
 		drawables = new HashSet<Drawable>();
 		
@@ -27,8 +31,7 @@ public class Scene implements Runnable
 		drawRenderLoop = new Timer("Draw-Render Loop");
 	}
 	
-	@Override
-	public void run()
+	public void start()
 	{
 		running = true;
 		final long startTime = System.currentTimeMillis();
@@ -93,5 +96,10 @@ public class Scene implements Runnable
 	public boolean isRunning()
 	{
 		return running;
+	}
+	
+	public String getTitle()
+	{
+		return title;
 	}
 }
