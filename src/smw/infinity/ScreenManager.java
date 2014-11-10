@@ -22,9 +22,6 @@ import javax.imageio.ImageIO;
 
 public final class ScreenManager
 {
-	public static final int DEFAULT_WINDOW_WIDTH = 768, DEFAULT_WINDOW_HEIGHT = 576;
-	public static final Dimension DEFAULT_DIMENSION = new Dimension(DEFAULT_WINDOW_WIDTH, DEFAULT_WINDOW_HEIGHT);
-	
 	private static GraphicsDevice graphicsCard = null;
 	private static GraphicsConfiguration graphicsConfig = null;
 	

@@ -1,6 +1,7 @@
 package smw.infinity;
 
 import java.awt.Canvas;
+import java.awt.Dimension;
 import java.awt.image.BufferStrategy;
 import java.util.HashSet;
 import java.util.Set;
@@ -9,6 +10,9 @@ import java.util.TimerTask;
 
 public abstract class Scene
 {
+	public static final int SCENE_WIDTH = 768, SCENE_HEIGHT = 576;
+	public static final Dimension SCENE_DIMENSION = new Dimension(SCENE_WIDTH, SCENE_HEIGHT);
+	
 	protected final String TITLE;
 	
 	protected static final long BASE_TIMER_DELAY = 100, FRAME_DELAY = 16;
@@ -20,7 +24,7 @@ public abstract class Scene
 	protected boolean running;
 	
 	protected Canvas canvas;
-	protected BufferStrategy buffer;
+	protected volatile BufferStrategy buffer;
 	
 	public Scene(String title)
 	{
@@ -34,9 +38,9 @@ public abstract class Scene
 		drawRenderLoop = new Timer("Draw-Render Loop");
 		
 		canvas = new Canvas();
-		canvas.setPreferredSize(ScreenManager.DEFAULT_DIMENSION);
-		canvas.setMinimumSize(ScreenManager.DEFAULT_DIMENSION);
-		canvas.setMaximumSize(ScreenManager.DEFAULT_DIMENSION);
+		canvas.setPreferredSize(SCENE_DIMENSION);
+		canvas.setMinimumSize(SCENE_DIMENSION);
+		canvas.setMaximumSize(SCENE_DIMENSION);
 	}
 	
 	public void init()
