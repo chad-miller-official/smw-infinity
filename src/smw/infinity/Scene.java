@@ -1,34 +1,48 @@
 package smw.infinity;
 
-import java.awt.Graphics2D;
+import java.awt.Canvas;
+import java.awt.image.BufferStrategy;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
 
-public /*abstract*/ class Scene
+public abstract class Scene
 {
-	protected String title;
+	protected final String TITLE;
 	
 	protected static final long BASE_TIMER_DELAY = 100, FRAME_DELAY = 16;
 	protected Set<Updatable> updatables;
 	protected Set<Drawable> drawables;
 	
-	protected Timer updateLoop;
-	protected Timer drawRenderLoop;
+	protected Timer updateLoop, drawRenderLoop;
 	
 	protected boolean running;
+	
+	protected Canvas canvas;
+	protected BufferStrategy buffer;
 	
 	public Scene(String title)
 	{
 		running = false;
 		
-		this.title = title;
+		TITLE = title;
 		updatables = new HashSet<Updatable>();
 		drawables = new HashSet<Drawable>();
 		
 		updateLoop = new Timer("Update Loop");
 		drawRenderLoop = new Timer("Draw-Render Loop");
+		
+		canvas = new Canvas();
+		canvas.setPreferredSize(ScreenManager.DEFAULT_DIMENSION);
+		canvas.setMinimumSize(ScreenManager.DEFAULT_DIMENSION);
+		canvas.setMaximumSize(ScreenManager.DEFAULT_DIMENSION);
+	}
+	
+	public void init()
+	{
+		canvas.createBufferStrategy(3);
+		buffer = canvas.getBufferStrategy();
 	}
 	
 	public void start()
@@ -42,21 +56,17 @@ public /*abstract*/ class Scene
 			@Override
 			public void run()
 			{
-				for(Updatable u : updatables)
+				delta = System.currentTimeMillis() - totalTime;
+				totalTime += delta;
+				update(delta);
+				
+				try
 				{
-					delta = System.currentTimeMillis() - totalTime;
-					totalTime += delta;
-					
-					u.update(delta);
-					
-					try
-					{
-						Thread.sleep(FRAME_DELAY);
-					}
-					catch(InterruptedException e)
-					{
-						e.printStackTrace();
-					}
+					Thread.sleep(FRAME_DELAY);
+				}
+				catch(InterruptedException e)
+				{
+					e.printStackTrace();
 				}
 			}
 		}, BASE_TIMER_DELAY, FRAME_DELAY);
@@ -65,15 +75,19 @@ public /*abstract*/ class Scene
 			@Override
 			public void run()
 			{
-				Graphics2D g2D = (Graphics2D) ScreenManager.getGraphics();
-				
-				for(Drawable d : drawables)
-					d.drawToScreen(g2D);
-				
-				g2D.dispose();
-				ScreenManager.show();
+				render();
+				buffer.show();
 			}
 		}, BASE_TIMER_DELAY, FRAME_DELAY);
+	}
+	
+	public abstract void update(long delta);
+	
+	public abstract void render();
+	
+	public Canvas getCanvas()
+	{
+		return canvas;
 	}
 	
 	public void stop()
@@ -81,6 +95,7 @@ public /*abstract*/ class Scene
 		updateLoop.cancel();
 		drawRenderLoop.cancel();
 		running = false;
+		buffer.dispose();
 	}
 	
 	public void addUpdatable(Updatable u)
@@ -100,6 +115,6 @@ public /*abstract*/ class Scene
 	
 	public String getTitle()
 	{
-		return title;
+		return TITLE;
 	}
 }

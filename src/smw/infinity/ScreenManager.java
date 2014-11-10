@@ -1,18 +1,18 @@
 package smw.infinity;
 
-import java.awt.Canvas;
+import java.awt.BorderLayout;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.Frame;
-import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.GraphicsConfiguration;
 import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
+import java.awt.Panel;
 import java.awt.Toolkit;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
-import java.awt.image.BufferStrategy;
 import java.awt.image.BufferedImage;
 import java.awt.image.VolatileImage;
 import java.io.File;
@@ -28,9 +28,8 @@ public final class ScreenManager
 	private static GraphicsDevice graphicsCard = null;
 	private static GraphicsConfiguration graphicsConfig = null;
 	
+	public static Panel masterPanel = null;
 	private static Frame frame = null;
-	private static Canvas canvas = null;
-	private static BufferStrategy buffer = null;
 	
 	private static Scene currentScene = null;
 	
@@ -67,18 +66,7 @@ public final class ScreenManager
 			@Override
 			public void windowClosing(WindowEvent e)
 			{
-				if(currentScene != null)
-					currentScene.stop();
-				
-				while(currentScene.isRunning());
-				
-				EventQueue.invokeLater(new Runnable() {
-					@Override
-					public void run()
-					{
-						dispose();
-					}
-				});
+				EventQueue.invokeLater(() -> stop());
 			}
 
 			@Override
@@ -106,34 +94,16 @@ public final class ScreenManager
 			}
 		});
 		
-		canvas = new Canvas();
-		canvas.setSize(DEFAULT_DIMENSION);
-		frame.add(canvas);
-		frame.pack();
-		
 		Dimension d = Toolkit.getDefaultToolkit().getScreenSize();
+		
+		masterPanel = new Panel(new BorderLayout());
+		masterPanel.add(currentScene.getCanvas(), BorderLayout.CENTER);
+		
+		frame.add(masterPanel);
+		frame.pack();
 		frame.setLocation((d.width - frame.getWidth()) / 2, ((d.height - frame.getHeight()) / 2) - 16);
 		
-		canvas.createBufferStrategy(3);
-		buffer = canvas.getBufferStrategy();
-	}
-	
-	public static void setVisible(boolean b)
-	{
-		frame.setVisible(b);
-	}
-	
-	public static Graphics getGraphics()
-	{
-		return buffer.getDrawGraphics();
-	}
-	
-	public static void show()
-	{
-		if(buffer == null || buffer.contentsLost())
-			return;
-		
-		buffer.show();
+		sc.init();
 	}
 	
 	public static BufferedImage createCompatibleImage(String url) throws IOException
@@ -158,23 +128,35 @@ public final class ScreenManager
 	
 	public static void start()
 	{
+		frame.setVisible(true);
 		currentScene.start();
 	}
 	
-	public static void dispose()
+	public static void stop()
 	{
+		if(currentScene != null)
+			currentScene.stop();
+		
+		while(currentScene.isRunning());
+		
 		frame.setVisible(false);
-		
-		if(buffer != null)
-			buffer.dispose();
-		
 		frame.dispose();
+	}
+	
+	public static void addComponent(Component comp, Object constraints)
+	{
+		masterPanel.add(comp, constraints);
+	}
+	
+	public static void removeComponent(Component comp)
+	{
+		masterPanel.remove(comp);
 	}
 	
 	@Override
 	protected void finalize() throws Throwable
 	{
-		dispose();
+		stop();
 		super.finalize();
 	}
 }
