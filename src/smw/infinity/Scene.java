@@ -2,11 +2,13 @@ package smw.infinity;
 
 import java.awt.Canvas;
 import java.awt.Dimension;
+import java.awt.MenuBar;
 import java.awt.image.BufferStrategy;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 public abstract class Scene
 {
@@ -19,7 +21,8 @@ public abstract class Scene
 	protected Set<Updatable> updatables;
 	protected Set<Drawable> drawables;
 	
-	protected Timer updateLoop, drawRenderLoop;
+	protected ScheduledThreadPoolExecutor services;
+	protected ScheduledFuture<?> updateLoop, renderLoop;
 	
 	protected boolean running;
 	
@@ -34,8 +37,7 @@ public abstract class Scene
 		updatables = new HashSet<Updatable>();
 		drawables = new HashSet<Drawable>();
 		
-		updateLoop = new Timer("Update Loop");
-		drawRenderLoop = new Timer("Draw-Render Loop");
+		services = new ScheduledThreadPoolExecutor(2);
 		
 		canvas = new Canvas();
 		canvas.setPreferredSize(SCENE_DIMENSION);
@@ -54,7 +56,7 @@ public abstract class Scene
 		running = true;
 		final long startTime = System.currentTimeMillis();
 		
-		updateLoop.scheduleAtFixedRate(new TimerTask() {
+		updateLoop = services.scheduleAtFixedRate(new Runnable() {
 			long totalTime = startTime, delta = 0;
 			
 			@Override
@@ -63,31 +65,22 @@ public abstract class Scene
 				delta = System.currentTimeMillis() - totalTime;
 				totalTime += delta;
 				update(delta);
-				
-				try
-				{
-					Thread.sleep(FRAME_DELAY);
-				}
-				catch(InterruptedException e)
-				{
-					e.printStackTrace();
-				}
 			}
-		}, BASE_TIMER_DELAY, FRAME_DELAY);
+		}, BASE_TIMER_DELAY, FRAME_DELAY, TimeUnit.MILLISECONDS);
 		
-		drawRenderLoop.scheduleAtFixedRate(new TimerTask() {
-			@Override
-			public void run()
-			{
-				render();
-				buffer.show();
-			}
-		}, BASE_TIMER_DELAY, FRAME_DELAY);
+		renderLoop = services.scheduleAtFixedRate(() -> {
+			render();
+			buffer.show();
+		}, BASE_TIMER_DELAY, FRAME_DELAY, TimeUnit.MILLISECONDS);
 	}
 	
 	public abstract void update(long delta);
 	
 	public abstract void render();
+	
+	public abstract SMWComponent[] getComponents();
+	
+	public abstract MenuBar getMenuBar();
 	
 	public Canvas getCanvas()
 	{
@@ -96,9 +89,8 @@ public abstract class Scene
 	
 	public void stop()
 	{
-		updateLoop.cancel();
-		drawRenderLoop.cancel();
 		running = false;
+		services.shutdown();
 		buffer.dispose();
 	}
 	

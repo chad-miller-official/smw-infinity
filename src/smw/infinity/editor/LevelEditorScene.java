@@ -1,17 +1,21 @@
 package smw.infinity.editor;
 
-import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Graphics2D;
+import java.awt.Menu;
+import java.awt.MenuBar;
+import java.awt.MenuItem;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 
+import smw.infinity.SMWComponent;
 import smw.infinity.Scene;
-import smw.infinity.ScreenManager;
 import smw.infinity.Updatable;
+import smw.infinity.map.AnimatedTile;
 import smw.infinity.map.Map;
 import smw.infinity.map.Tile;
+import smw.infinity.map.Tileset;
 
 public class LevelEditorScene extends Scene implements MouseListener, MouseMotionListener
 {
@@ -19,6 +23,9 @@ public class LevelEditorScene extends Scene implements MouseListener, MouseMotio
 	private boolean mouseInBounds;
 	
 	private Map map;
+	
+	private MenuBar menuBar;
+	private Menu tilesetMenu;
 	private TilesetViewer tilesetViewer;
 	
 	public LevelEditorScene()
@@ -32,15 +39,43 @@ public class LevelEditorScene extends Scene implements MouseListener, MouseMotio
 		mouseInBounds = false;
 		
 		map = new Map();
+		
+		menuBar = new MenuBar();
+		tilesetMenu = new Menu("Tilesets", true);
+		
+		for(Tileset t : Tileset.activeTilesets)
+		{
+			String name = t.getName();
+			MenuItem ml = new MenuItem(name);
+			ml.addActionListener((event) -> tilesetViewer.changeTileset(name));
+			tilesetMenu.add(ml);
+		}
+		
+		menuBar.add(tilesetMenu);
 		tilesetViewer = new TilesetViewer("Classic");
+		
+		updatables.add(map);
+		updatables.add(tilesetViewer);
 	}
 	
 	@Override
 	public void init()
 	{
 		super.init();
-		ScreenManager.addComponent(tilesetViewer, BorderLayout.LINE_END);
 		tilesetViewer.init();
+	}
+	
+	@Override
+	public void stop()
+	{
+		super.stop();
+		tilesetViewer.stop();
+	}
+	
+	@Override
+	public SMWComponent[] getComponents()
+	{
+		return new SMWComponent[]{ tilesetViewer };
 	}
 	
 	@Override
@@ -48,8 +83,6 @@ public class LevelEditorScene extends Scene implements MouseListener, MouseMotio
 	{
 		for(Updatable u : updatables)
 			u.update(delta);
-		
-		tilesetViewer.update(delta);
 	}
 	
 	@Override
@@ -104,7 +137,14 @@ public class LevelEditorScene extends Scene implements MouseListener, MouseMotio
 	public void mouseReleased(MouseEvent e)
 	{
 		if(e.getButton() == MouseEvent.BUTTON1)
-			map.setTile(tilesetViewer.getSelectedTile(), mouseX32, mouseY32);
+		{
+			Tile toPlace = tilesetViewer.getSelectedTile();
+					
+			if(toPlace instanceof AnimatedTile)
+				map.setTile(((AnimatedTile) toPlace).clone(), mouseX32, mouseY32);
+			else if(toPlace instanceof Tile)
+				map.setTile(toPlace, mouseX32, mouseY32);
+		}
 		else if(e.getButton() == MouseEvent.BUTTON3)
 			map.setTile(null, mouseX32, mouseY32);
 		
@@ -127,5 +167,11 @@ public class LevelEditorScene extends Scene implements MouseListener, MouseMotio
 		
 		mouseX32 = mouseX / Tile.TILE_SIZE;
 		mouseY32 = mouseY / Tile.TILE_SIZE;
+	}
+	
+	@Override
+	public MenuBar getMenuBar()
+	{
+		return menuBar;
 	}
 }

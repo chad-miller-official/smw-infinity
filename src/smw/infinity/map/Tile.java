@@ -7,21 +7,28 @@ import java.io.Serializable;
 
 import smw.infinity.Drawable;
 
-public class Tile implements Cloneable, Drawable, Serializable
+public class Tile implements Drawable, Serializable
 {
 	private static final long serialVersionUID = 1237251774437640919L;
 	public static final byte TILE_SIZE = 32;
 	
 	protected short tilesetX, tilesetY;
 	protected byte tilesetIndex;	//index in Tileset.activeTilesets
-	protected transient BufferedImage tileImg;
+	protected transient Image tileImg;
 	
 	public Tile(short tilesetX, short tilesetY, byte tilesetIndex)
+	{
+		this(tilesetX, tilesetY, tilesetIndex, false);
+	}
+	
+	protected Tile(short tilesetX, short tilesetY, byte tilesetIndex, boolean noSet)
 	{
 		this.tilesetX = tilesetX;
 		this.tilesetY = tilesetY;
 		this.tilesetIndex = tilesetIndex;
-		tileImg = ((BufferedImage) Tileset.activeTilesets.get(tilesetIndex).getImage()).getSubimage(tilesetX * TILE_SIZE, tilesetY * TILE_SIZE, TILE_SIZE, TILE_SIZE);
+		
+		if(!noSet)
+			tileImg = ((BufferedImage) Tileset.activeTilesets.get(tilesetIndex).getImage()).getSubimage(tilesetX * TILE_SIZE, tilesetY * TILE_SIZE, TILE_SIZE, TILE_SIZE);
 	}
 
 	@Override
@@ -34,11 +41,5 @@ public class Tile implements Cloneable, Drawable, Serializable
 	public Image getImage()
 	{
 		return tileImg;
-	}
-	
-	@Override
-	public Object clone()
-	{
-		return new Tile(tilesetX, tilesetY, tilesetIndex);
 	}
 }

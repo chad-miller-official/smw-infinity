@@ -1,26 +1,33 @@
 package smw.infinity.editor;
 
+import java.awt.BorderLayout;
 import java.awt.Canvas;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
+import java.awt.Point;
+import java.awt.ScrollPane;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.awt.image.BufferStrategy;
 
+import smw.infinity.SMWComponent;
 import smw.infinity.Scene;
 import smw.infinity.Updatable;
 import smw.infinity.map.Tile;
 import smw.infinity.map.Tileset;
 
-public class TilesetViewer extends Canvas implements MouseListener, MouseMotionListener, Updatable
+public class TilesetViewer extends Canvas implements MouseListener, MouseMotionListener, SMWComponent, Updatable
 {
 	private static final long serialVersionUID = -7404915507606671525L;
 	
-	private static final int TILESET_VIEWER_WIDTH = 192;
-	private static final int TILESET_VIEWER_HEIGHT = Scene.SCENE_HEIGHT;
-	private static final Dimension TILESET_VIEWER_DIMENSION = new Dimension(TILESET_VIEWER_WIDTH, TILESET_VIEWER_HEIGHT);
+	public static final int TILESET_VIEWER_PANE_WIDTH = 192;
+	public static final int TILESET_VIEWER_PANE_HEIGHT = Scene.SCENE_HEIGHT;
+	public static final Dimension TILESET_VIEWER_PANE_DIMENSION = new Dimension(TILESET_VIEWER_PANE_WIDTH, TILESET_VIEWER_PANE_HEIGHT);
+	
+	private ScrollPane scrollPane;
 	
 	private volatile BufferStrategy buffer;
 	private int mouseX, mouseY, mouseX32, mouseY32;
@@ -33,14 +40,20 @@ public class TilesetViewer extends Canvas implements MouseListener, MouseMotionL
 	{
 		super();
 		
-		setPreferredSize(TILESET_VIEWER_DIMENSION);
-		setMinimumSize(TILESET_VIEWER_DIMENSION);
-		setMaximumSize(TILESET_VIEWER_DIMENSION);
-		
 		currentTileset = Tileset.getTileset(tileset);
+		
+		setPreferredSize(currentTileset.getDimensions());
+		setMinimumSize(currentTileset.getDimensions());
+		setMaximumSize(currentTileset.getDimensions());
 		
 		addMouseListener(this);
 		addMouseMotionListener(this);
+		
+		scrollPane = new ScrollPane(ScrollPane.SCROLLBARS_AS_NEEDED);
+		scrollPane.setPreferredSize(TilesetViewer.TILESET_VIEWER_PANE_DIMENSION);
+		scrollPane.setMinimumSize(TilesetViewer.TILESET_VIEWER_PANE_DIMENSION);
+		scrollPane.setMaximumSize(TilesetViewer.TILESET_VIEWER_PANE_DIMENSION);
+		scrollPane.add(this);
 	}
 	
 	public void init()
@@ -49,18 +62,28 @@ public class TilesetViewer extends Canvas implements MouseListener, MouseMotionL
 		buffer = getBufferStrategy();
 	}
 	
+	public void stop()
+	{
+		buffer.dispose();
+	}
+	
 	@Override
 	public void update(long delta)
 	{
-		return;
+		if(currentTileset instanceof Updatable)
+			((Updatable) currentTileset).update(delta);
+		
+		if(selectedTile instanceof Updatable)
+			((Updatable) selectedTile).update(delta);
 	}
 	
 	public void render()
 	{
-		//test code
+		Point p = scrollPane.getScrollPosition();
+		
 		Graphics2D g2D = (Graphics2D) buffer.getDrawGraphics();
 		g2D.setColor(Color.WHITE);
-		g2D.fillRect(0, 0, Scene.SCENE_WIDTH, Scene.SCENE_HEIGHT);
+		g2D.fillRect(p.x, p.y, TILESET_VIEWER_PANE_WIDTH, TILESET_VIEWER_PANE_HEIGHT);
 		
 		currentTileset.drawToScreen(g2D, 0, 0);
 		
@@ -128,5 +151,28 @@ public class TilesetViewer extends Canvas implements MouseListener, MouseMotionL
 	public Tile getSelectedTile()
 	{
 		return selectedTile;
+	}
+	
+	@Override
+	public Component getAddable()
+	{
+		return scrollPane;
+	}
+	
+	@Override
+	public Object getConstraint()
+	{
+		return BorderLayout.LINE_END;
+	}
+	
+	public void changeTileset(String tilesetName)
+	{
+		currentTileset = Tileset.getTileset(tilesetName);
+		
+		setPreferredSize(currentTileset.getDimensions());
+		setMinimumSize(currentTileset.getDimensions());
+		setMaximumSize(currentTileset.getDimensions());
+		
+		scrollPane.revalidate();
 	}
 }

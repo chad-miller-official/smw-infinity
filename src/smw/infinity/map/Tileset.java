@@ -1,8 +1,8 @@
 package smw.infinity.map;
 
+import java.awt.Dimension;
 import java.awt.Graphics2D;
 import java.awt.Image;
-import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -18,23 +18,23 @@ public class Tileset implements Drawable
 	public static List<Tileset> activeTilesets = new ArrayList<Tileset>(8);
 	
 	protected String tilesetName;
-	protected BufferedImage tileset;
+	protected Image tileset;
 	protected int widthTiles, heightTiles;
 	
-	private Tileset(String tilesetName, BufferedImage tileset)
+	protected Tileset(String tilesetName)
 	{
 		this.tilesetName = tilesetName;
-		this.tileset = tileset;
-		widthTiles = tileset.getWidth() / Tile.TILE_SIZE;
-		heightTiles = tileset.getHeight() / Tile.TILE_SIZE;
 	}
 	
 	public static void loadTileset(String name) throws IOException
 	{
 		String dir = TILESET_DIR + name + "/tileset.png";
-		System.out.println(dir);
-		BufferedImage tilesetImg = ImageIO.read(new File(dir));
-		Tileset toAdd = new Tileset(name, tilesetImg);
+		
+		Tileset toAdd = new Tileset(name);
+		toAdd.tileset = ImageIO.read(new File(dir));
+		toAdd.widthTiles = toAdd.tileset.getWidth(null) / Tile.TILE_SIZE;
+		toAdd.heightTiles = toAdd.tileset.getHeight(null) / Tile.TILE_SIZE;
+		
 		activeTilesets.add(toAdd);
 	}
 	
@@ -67,5 +67,20 @@ public class Tileset implements Drawable
 	public String getName()
 	{
 		return tilesetName;
+	}
+	
+	public int getWidth()
+	{
+		return widthTiles * Tile.TILE_SIZE;
+	}
+	
+	public int getHeight()
+	{
+		return heightTiles * Tile.TILE_SIZE;
+	}
+	
+	public Dimension getDimensions()
+	{
+		return new Dimension(widthTiles * Tile.TILE_SIZE, heightTiles * Tile.TILE_SIZE);
 	}
 }

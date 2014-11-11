@@ -9,6 +9,7 @@ import java.awt.Graphics2D;
 import java.awt.GraphicsConfiguration;
 import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
+import java.awt.MenuBar;
 import java.awt.Panel;
 import java.awt.Toolkit;
 import java.awt.event.WindowEvent;
@@ -64,6 +65,7 @@ public final class ScreenManager
 			public void windowClosing(WindowEvent e)
 			{
 				EventQueue.invokeLater(() -> stop());
+				System.exit(0);
 			}
 
 			@Override
@@ -94,11 +96,22 @@ public final class ScreenManager
 		Dimension d = Toolkit.getDefaultToolkit().getScreenSize();
 		
 		masterPanel = new Panel(new BorderLayout());
-		masterPanel.add(currentScene.getCanvas(), BorderLayout.CENTER);
+		masterPanel.add(sc.getCanvas(), BorderLayout.CENTER);
 		
 		frame.add(masterPanel);
 		frame.pack();
 		frame.setLocation((d.width - frame.getWidth()) / 2, ((d.height - frame.getHeight()) / 2) - 16);
+		
+		//Add scene-specific components and initialize scene
+		MenuBar mb = sc.getMenuBar();
+		
+		if(mb != null)
+			frame.setMenuBar(mb);
+		
+		SMWComponent[] sceneComps = sc.getComponents();
+		
+		for(SMWComponent comp : sceneComps)
+			addComponent(comp.getAddable(), comp.getConstraint());
 		
 		sc.init();
 	}
@@ -133,8 +146,6 @@ public final class ScreenManager
 	{
 		if(currentScene != null)
 			currentScene.stop();
-		
-		while(currentScene.isRunning());
 		
 		frame.setVisible(false);
 		frame.dispose();
