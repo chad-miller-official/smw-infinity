@@ -93,14 +93,10 @@ public final class ScreenManager
 			}
 		});
 		
-		Dimension d = Toolkit.getDefaultToolkit().getScreenSize();
-		
 		masterPanel = new Panel(new BorderLayout());
 		masterPanel.add(sc.getCanvas(), BorderLayout.CENTER);
 		
 		frame.add(masterPanel);
-		frame.pack();
-		frame.setLocation((d.width - frame.getWidth()) / 2, ((d.height - frame.getHeight()) / 2) - 16);
 		
 		//Add scene-specific components and initialize scene
 		MenuBar mb = sc.getMenuBar();
@@ -113,6 +109,9 @@ public final class ScreenManager
 		for(SMWComponent comp : sceneComps)
 			addComponent(comp.getAddable(), comp.getConstraint());
 		
+		frame.pack();
+		Dimension d = Toolkit.getDefaultToolkit().getScreenSize();
+		frame.setLocation((d.width - frame.getWidth()) / 2, ((d.height - frame.getHeight()) / 2) - 16);
 		sc.init();
 	}
 	

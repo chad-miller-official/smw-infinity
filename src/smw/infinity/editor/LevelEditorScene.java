@@ -13,6 +13,7 @@ import smw.infinity.SMWComponent;
 import smw.infinity.Scene;
 import smw.infinity.Updatable;
 import smw.infinity.map.AnimatedTile;
+import smw.infinity.map.InteractiveTile;
 import smw.infinity.map.Map;
 import smw.infinity.map.Tile;
 import smw.infinity.map.Tileset;
@@ -43,11 +44,26 @@ public class LevelEditorScene extends Scene implements MouseListener, MouseMotio
 		menuBar = new MenuBar();
 		tilesetMenu = new Menu("Tilesets", true);
 		
+		MenuItem ml = new MenuItem("Interactive");
+		ml.addActionListener((event) -> {
+			tilesetViewer.changeTileset("Interactive");
+			tilesetViewer.setInteractiveMode(true);
+		});
+		tilesetMenu.add(ml);
+		
+		tilesetMenu.addSeparator();
+		
 		for(Tileset t : Tileset.activeTilesets)
 		{
+			if(t.getName().equals("Interactive"))
+				continue;
+			
 			String name = t.getName();
-			MenuItem ml = new MenuItem(name);
-			ml.addActionListener((event) -> tilesetViewer.changeTileset(name));
+			ml = new MenuItem(name);
+			ml.addActionListener((event) -> {
+				tilesetViewer.changeTileset(name);
+				tilesetViewer.setInteractiveMode(false);
+			});
 			tilesetMenu.add(ml);
 		}
 		
@@ -92,10 +108,7 @@ public class LevelEditorScene extends Scene implements MouseListener, MouseMotio
 		g2D.setColor(Color.WHITE);
 		g2D.fillRect(0, 0, Scene.SCENE_WIDTH, Scene.SCENE_HEIGHT);
 		
-		for(int i = 0; i < Map.MAP_WIDTH; i++)
-			for(int j = 0; j < Map.MAP_HEIGHT; j++)
-				if(map.getTile(i, j) != null)
-					map.getTile(i, j).drawToScreen(g2D, i * Tile.TILE_SIZE, j * Tile.TILE_SIZE);
+		map.drawToScreen(g2D, 0, 0);
 		
 		if(mouseInBounds)
 		{
@@ -139,14 +152,19 @@ public class LevelEditorScene extends Scene implements MouseListener, MouseMotio
 		if(e.getButton() == MouseEvent.BUTTON1)
 		{
 			Tile toPlace = tilesetViewer.getSelectedTile();
-					
-			if(toPlace instanceof AnimatedTile)
-				map.setTile(((AnimatedTile) toPlace).clone(), mouseX32, mouseY32);
-			else if(toPlace instanceof Tile)
-				map.setTile(toPlace, mouseX32, mouseY32);
+			
+			if(tilesetViewer.getInteractiveMode())
+				map.setTile(((InteractiveTile) toPlace).clone(), Map.INTERACTIVE_LAYER, mouseX32, mouseY32);
+			else
+			{
+				if(toPlace instanceof AnimatedTile)
+					map.setTile(((AnimatedTile) toPlace).clone(), 1, mouseX32, mouseY32);
+				else if(toPlace instanceof Tile)
+					map.setTile(toPlace, 1, mouseX32, mouseY32);
+			}
 		}
 		else if(e.getButton() == MouseEvent.BUTTON3)
-			map.setTile(null, mouseX32, mouseY32);
+			map.setTile(null, tilesetViewer.getInteractiveMode() ? Map.INTERACTIVE_LAYER : 1, mouseX32, mouseY32);
 		
 		e.consume();
 	}

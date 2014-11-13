@@ -23,7 +23,7 @@ public class TilesetViewer extends Canvas implements MouseListener, MouseMotionL
 {
 	private static final long serialVersionUID = -7404915507606671525L;
 	
-	public static final int TILESET_VIEWER_PANE_WIDTH = 192;
+	public static final int TILESET_VIEWER_PANE_WIDTH = 256;
 	public static final int TILESET_VIEWER_PANE_HEIGHT = Scene.SCENE_HEIGHT;
 	public static final Dimension TILESET_VIEWER_PANE_DIMENSION = new Dimension(TILESET_VIEWER_PANE_WIDTH, TILESET_VIEWER_PANE_HEIGHT);
 	
@@ -35,6 +35,8 @@ public class TilesetViewer extends Canvas implements MouseListener, MouseMotionL
 	
 	private Tile selectedTile;
 	private Tileset currentTileset;
+	
+	private boolean interactiveMode;
 	
 	public TilesetViewer(String tileset)
 	{
@@ -54,6 +56,8 @@ public class TilesetViewer extends Canvas implements MouseListener, MouseMotionL
 		scrollPane.setMinimumSize(TilesetViewer.TILESET_VIEWER_PANE_DIMENSION);
 		scrollPane.setMaximumSize(TilesetViewer.TILESET_VIEWER_PANE_DIMENSION);
 		scrollPane.add(this);
+		
+		interactiveMode = false;
 	}
 	
 	public void init()
@@ -126,7 +130,9 @@ public class TilesetViewer extends Canvas implements MouseListener, MouseMotionL
 	@Override
 	public void mouseReleased(MouseEvent e)
 	{
-		selectedTile = currentTileset.getTile((short) mouseX32, (short) mouseY32);
+		if(inBounds(mouseX, mouseY))
+			selectedTile = currentTileset.getTile((short) mouseX32, (short) mouseY32);
+		
 		e.consume();
 	}
 
@@ -174,5 +180,20 @@ public class TilesetViewer extends Canvas implements MouseListener, MouseMotionL
 		setMaximumSize(currentTileset.getDimensions());
 		
 		scrollPane.revalidate();
+	}
+	
+	private boolean inBounds(int x, int y)
+	{
+		return x >= 0 && x <= currentTileset.getWidth() && y >= 0 && y <= currentTileset.getHeight();
+	}
+	
+	public boolean getInteractiveMode()
+	{
+		return interactiveMode;
+	}
+	
+	public void setInteractiveMode(boolean interactiveMode)
+	{
+		this.interactiveMode = interactiveMode;
 	}
 }

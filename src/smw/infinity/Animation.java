@@ -7,7 +7,7 @@ import java.awt.image.BufferedImage;
 public class Animation implements Cloneable, Drawable, Updatable
 {
 	private Frame[] frames;
-	private long frameRate, timeSinceUpdate, totalTime;
+	private long frameRate, phase, totalTime;
 	private int index, width, height;
 	
 	public Animation(long frameRate, Image... images)
@@ -22,7 +22,7 @@ public class Animation implements Cloneable, Drawable, Updatable
 		}
 		
 		this.frameRate = frameRate;
-		timeSinceUpdate = 0;
+		phase = 0;
 		index = 0;
 		width = frames[0].image.getWidth(null);
 		height = frames[0].image.getHeight(null);
@@ -31,7 +31,7 @@ public class Animation implements Cloneable, Drawable, Updatable
 	private Animation(long frameRate, long timeSinceUpdate, long totalTime, int index, int width, int height, Frame[] frames)
 	{
 		this.frameRate = frameRate;
-		this.timeSinceUpdate = timeSinceUpdate;
+		this.phase = timeSinceUpdate;
 		this.totalTime = totalTime;
 		this.index = index;
 		this.width = width;
@@ -42,15 +42,15 @@ public class Animation implements Cloneable, Drawable, Updatable
 	@Override
 	public void update(long delta)
 	{
-		timeSinceUpdate += delta;
+		phase += delta;
 		
-		if(timeSinceUpdate > totalTime)
+		if(phase > totalTime)
 		{
-			timeSinceUpdate = 0;
+			phase = 0;
 			index = 0;
 		}
 		
-		while(timeSinceUpdate > frames[index].endTime)
+		while(phase > frames[index].endTime)
 			index++;
 	}
 
@@ -79,7 +79,7 @@ public class Animation implements Cloneable, Drawable, Updatable
 	@Override
 	public Animation clone()
 	{
-		return new Animation(frameRate, timeSinceUpdate, totalTime, index, width, height, frames);
+		return new Animation(frameRate, phase, totalTime, index, width, height, frames);
 	}
 	
 	public Animation getSubanimation(int x, int y, int w, int h)
@@ -94,12 +94,12 @@ public class Animation implements Cloneable, Drawable, Updatable
 	
 	public void setPhase(long phase)
 	{
-		timeSinceUpdate = phase;
+		this.phase = phase;
 	}
 	
 	public long getPhase()
 	{
-		return timeSinceUpdate;
+		return phase;
 	}
 	
 	private class Frame implements Cloneable

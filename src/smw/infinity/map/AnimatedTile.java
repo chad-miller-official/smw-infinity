@@ -6,7 +6,7 @@ import smw.infinity.Updatable;
 public class AnimatedTile extends Tile implements Cloneable, Updatable
 {
 	private static final long serialVersionUID = -8088947781669879370L;
-	private transient Animation tileImgAnim;
+	protected transient Animation tileImgAnim;
 
 	public AnimatedTile(short tilesetX, short tilesetY, byte tilesetIndex)
 	{

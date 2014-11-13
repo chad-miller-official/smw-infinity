@@ -5,6 +5,7 @@ import java.io.IOException;
 import smw.infinity.ScreenManager;
 import smw.infinity.editor.LevelEditorScene;
 import smw.infinity.map.AnimatedTileset;
+import smw.infinity.map.InteractiveTileset;
 import smw.infinity.map.Tileset;
 
 public class TestRunner
@@ -32,11 +33,11 @@ public class TestRunner
 					String name = file.getName();
 					
 					if(name.equals("anim"))
-					{
 						for(File subfile : file.listFiles())
-							if(subfile.isDirectory())
-								AnimatedTileset.loadTileset(subfile.getName());
-					}
+							if(subfile.getName().equals("Interactive"))
+								InteractiveTileset.loadInteractiveTileset();
+							else
+								AnimatedTileset.loadAnimatedTileset(subfile.getName());
 					else
 						Tileset.loadTileset(name);
 				}
@@ -45,10 +46,5 @@ public class TestRunner
 		{
 			e.printStackTrace();
 		}
-	}
-	
-	public static void loadAnimTilesets(File f) throws IOException
-	{
-		
 	}
 }

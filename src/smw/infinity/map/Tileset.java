@@ -6,6 +6,7 @@ import java.awt.Image;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Hashtable;
 import java.util.List;
 
 import javax.imageio.ImageIO;
@@ -15,7 +16,9 @@ import smw.infinity.Drawable;
 public class Tileset implements Drawable
 {
 	public static final String TILESET_DIR = "res/gfx/tilesets/";
+	
 	public static List<Tileset> activeTilesets = new ArrayList<Tileset>(8);
+	protected static Hashtable<String, Integer> activeTilesetsIndices = new Hashtable<String, Integer>();
 	
 	protected String tilesetName;
 	protected Image tileset;
@@ -35,16 +38,13 @@ public class Tileset implements Drawable
 		toAdd.widthTiles = toAdd.tileset.getWidth(null) / Tile.TILE_SIZE;
 		toAdd.heightTiles = toAdd.tileset.getHeight(null) / Tile.TILE_SIZE;
 		
+		activeTilesetsIndices.put(name, activeTilesets.size());
 		activeTilesets.add(toAdd);
 	}
 	
 	public static Tileset getTileset(String name)
 	{
-		for(int i = 0, s = activeTilesets.size(); i < s; i++)
-			if(activeTilesets.get(i).getName().equals(name))
-				return activeTilesets.get(i);
-		
-		return null;
+		return activeTilesets.get(activeTilesetsIndices.get(name));
 	}
 
 	@Override

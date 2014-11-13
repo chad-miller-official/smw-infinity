@@ -9,23 +9,22 @@ import java.util.List;
 import javax.imageio.ImageIO;
 
 import smw.infinity.Animation;
-import smw.infinity.Updatable;
 
-public class AnimatedTileset extends Tileset implements Updatable
+public class InteractiveTileset extends AnimatedTileset
 {
-	public static String ANIM_TILESET_DIR = TILESET_DIR + "anim/";
-	protected Animation tilesetAnim;
+	public static String INTERACTIVE_TILESET_DIR = ANIM_TILESET_DIR + "Interactive/";
+	protected static byte interactiveTilesetIndex = -1;
 	
-	protected AnimatedTileset(String tilesetName)
+	protected InteractiveTileset(String tilesetName)
 	{
 		super(tilesetName);
 	}
 	
-	public static void loadAnimatedTileset(String name) throws IOException
+	public static void loadInteractiveTileset() throws IOException
 	{
-		String dir = ANIM_TILESET_DIR + name + "/";
+		String dir = INTERACTIVE_TILESET_DIR;
 		
-		AnimatedTileset toAdd = new AnimatedTileset(name);
+		InteractiveTileset toAdd = new InteractiveTileset("Interactive");
 		List<Image> images = new LinkedList<Image>();
 		int index = 1;
 		Image img = ImageIO.read(new File(dir + index + ".png"));
@@ -49,27 +48,19 @@ public class AnimatedTileset extends Tileset implements Updatable
 		toAdd.widthTiles = toAdd.tilesetAnim.getWidth() / Tile.TILE_SIZE;
 		toAdd.heightTiles = toAdd.tilesetAnim.getHeight() / Tile.TILE_SIZE;
 		
-		activeTilesetsIndices.put(name, activeTilesets.size());
+		activeTilesetsIndices.put("Interactive", activeTilesets.size());
+		interactiveTilesetIndex = (byte) activeTilesets.size();
 		activeTilesets.add(toAdd);
 	}
-
-	@Override
-	public void update(long delta)
-	{
-		tilesetAnim.update(delta);
-		tileset = tilesetAnim.getImage();
-	}
 	
-	public Animation getImageAnim()
+	public static byte getInteractiveTilesetIndex()
 	{
-		return tilesetAnim;
+		return interactiveTilesetIndex;
 	}
 	
 	@Override
 	public Tile getTile(short x, short y)
 	{
-		AnimatedTile toReturn = new AnimatedTile(x, y, (byte) activeTilesets.indexOf(this));
-		toReturn.setPhase(tilesetAnim.getPhase());
-		return toReturn;
+		return new InteractiveTile(x, y);
 	}
 }
