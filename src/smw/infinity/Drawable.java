@@ -5,7 +5,7 @@ import java.awt.Image;
 
 public interface Drawable
 {
-	void drawToScreen(Graphics2D g2D, int x, int y);
-	
+	void drawToScreen( Graphics2D g2D, int x, int y );
+
 	Image getImage();
 }

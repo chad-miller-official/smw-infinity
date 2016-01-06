@@ -1,0 +1,33 @@
+<project name="SMW Infinity" default="dist" basedir=".">
+    <description>
+        SMW Infinity
+    </description>
+    
+    <!-- set global properties for this build -->
+    <property name="src" location="src"/>
+    <property name="build" location="bin"/>
+
+    <target name="init">
+        <!-- Create the time stamp -->
+        <tstamp/>
+        
+        <!-- Create the build directory structure used by compile -->
+        <mkdir dir="${build}"/>
+    </target>
+
+    <target name="compile" depends="init" description="compile the source">
+        <!-- Compile the java code from ${src} into ${build} -->
+        <javac srcdir="${src}" destdir="${build}" includeantruntime="false"/>
+    </target>
+
+    <target name="dist" depends="compile" description="generate the distribution">
+        <!-- Put everything in ${build} into the MyProject-${DSTAMP}.jar file -->
+        <jar jarfile="smw-infinity.jar" basedir="${build}"/>
+    </target>
+
+    <target name="clean" description="clean up">
+        <!-- Delete the ${build} and ${dist} directory trees -->
+        <delete dir="${build}"/>
+        <delete file="smw-infinity.jar"/>
+    </target>
+</project>

@@ -13,54 +13,53 @@ import smw.infinity.Animation;
 public class InteractiveTileset extends AnimatedTileset
 {
 	public static String INTERACTIVE_TILESET_DIR = ANIM_TILESET_DIR + "Interactive/";
-	protected static byte interactiveTilesetIndex = -1;
-	
+
+	protected static byte interactiveTilesetIndex = -1;	// Invalid index by default
+
 	protected InteractiveTileset(String tilesetName)
 	{
-		super(tilesetName);
+		super( tilesetName );
 	}
-	
+
 	public static void loadInteractiveTileset() throws IOException
 	{
-		String dir = INTERACTIVE_TILESET_DIR;
-		
 		InteractiveTileset toAdd = new InteractiveTileset("Interactive");
-		List<Image> images = new LinkedList<Image>();
-		int index = 1;
-		Image img = ImageIO.read(new File(dir + index + ".png"));
-		
-		while(img != null)
+		List<Image> images       = new LinkedList<Image>();
+		int index                = 1;
+		Image img                = ImageIO.read( new File( INTERACTIVE_TILESET_DIR + index + ".png" ) );
+
+		while( img != null )
 		{
-			images.add(img);
+			images.add( img );
 			index++;
-			
+
 			try
 			{
-				img = ImageIO.read(new File(dir + index + ".png"));
+				img = ImageIO.read( new File( INTERACTIVE_TILESET_DIR + index + ".png" ) );
 			}
 			catch(IOException e)
 			{
 				break;
 			}
 		}
-		
-		toAdd.tilesetAnim = new Animation(175, images.toArray(new Image[images.size()]));
-		toAdd.widthTiles = toAdd.tilesetAnim.getWidth() / Tile.TILE_SIZE;
+
+		toAdd.tilesetAnim = new Animation( 175, images.toArray( new Image[images.size()] ) );
+		toAdd.widthTiles  = toAdd.tilesetAnim.getWidth() / Tile.TILE_SIZE;
 		toAdd.heightTiles = toAdd.tilesetAnim.getHeight() / Tile.TILE_SIZE;
-		
-		activeTilesetsIndices.put("Interactive", activeTilesets.size());
+
+		activeTilesetsIndices.put( "Interactive", activeTilesets.size() );
 		interactiveTilesetIndex = (byte) activeTilesets.size();
-		activeTilesets.add(toAdd);
+		activeTilesets.add( toAdd );
 	}
-	
+
 	public static byte getInteractiveTilesetIndex()
 	{
 		return interactiveTilesetIndex;
 	}
-	
+
 	@Override
-	public Tile getTile(short x, short y)
+	public Tile getTile( short x, short y )
 	{
-		return new InteractiveTile(x, y);
+		return new InteractiveTile( x, y );
 	}
 }

@@ -2,5 +2,5 @@ package smw.infinity;
 
 public interface Updatable
 {
-	void update(long delta);
+	void update( long delta );
 }

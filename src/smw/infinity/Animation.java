@@ -9,55 +9,55 @@ public class Animation implements Cloneable, Drawable, Updatable
 	private Frame[] frames;
 	private long frameRate, phase, totalTime;
 	private int index, width, height;
-	
-	public Animation(long frameRate, Image... images)
+
+	public Animation( long frameRate, Image... images )
 	{
 		frames = new Frame[images.length];
 		totalTime = 0;
-		
-		for(int i = 0; i < images.length; i++)
-		{			
+
+		for( int i = 0; i < images.length; i++ )
+		{
 			totalTime += frameRate;
-			frames[i] = new Frame(images[i], totalTime);
+			frames[i] = new Frame( images[i], totalTime );
 		}
-		
+
 		this.frameRate = frameRate;
 		phase = 0;
 		index = 0;
-		width = frames[0].image.getWidth(null);
-		height = frames[0].image.getHeight(null);
+		width = frames[0].image.getWidth( null );
+		height = frames[0].image.getHeight( null );
 	}
-	
-	private Animation(long frameRate, long timeSinceUpdate, long totalTime, int index, int width, int height, Frame[] frames)
+
+	private Animation( long frameRate, long timeSinceUpdate, long totalTime, int index, int width, int height, Frame[] frames )
 	{
 		this.frameRate = frameRate;
-		this.phase = timeSinceUpdate;
+		this.phase     = timeSinceUpdate;
 		this.totalTime = totalTime;
-		this.index = index;
-		this.width = width;
-		this.height = height;
-		this.frames = frames;
+		this.index     = index;
+		this.width     = width;
+		this.height    = height;
+		this.frames    = frames;
 	}
 
 	@Override
-	public void update(long delta)
+	public void update( long delta )
 	{
 		phase += delta;
-		
-		if(phase > totalTime)
+
+		if( phase > totalTime )
 		{
 			phase = 0;
 			index = 0;
 		}
-		
-		while(phase > frames[index].endTime)
+
+		while( phase > frames[index].endTime )
 			index++;
 	}
 
 	@Override
-	public void drawToScreen(Graphics2D g2D, int x, int y)
+	public void drawToScreen( Graphics2D g2D, int x, int y )
 	{
-		g2D.drawImage(frames[index].image, x, y, null);
+		g2D.drawImage( frames[index].image, x, y, null );
 	}
 
 	@Override
@@ -65,58 +65,58 @@ public class Animation implements Cloneable, Drawable, Updatable
 	{
 		return frames[index].image;
 	}
-	
+
 	public int getWidth()
 	{
 		return width;
 	}
-	
+
 	public int getHeight()
 	{
 		return height;
 	}
-	
+
 	@Override
 	public Animation clone()
 	{
-		return new Animation(frameRate, phase, totalTime, index, width, height, frames);
+		return new Animation( frameRate, phase, totalTime, index, width, height, frames );
 	}
-	
-	public Animation getSubanimation(int x, int y, int w, int h)
+
+	public Animation getSubanimation( int x, int y, int w, int h )
 	{
 		BufferedImage[] subimgs = new BufferedImage[frames.length];
-		
-		for(int i = 0; i < subimgs.length; i++)
-			subimgs[i] = ((BufferedImage) frames[i].image).getSubimage(x, y, w, h);
-		
+
+		for( int i = 0; i < subimgs.length; i++ )
+			subimgs[i] = ( (BufferedImage) frames[i].image ).getSubimage( x, y, w, h );
+
 		return new Animation(frameRate, subimgs);
 	}
-	
-	public void setPhase(long phase)
+
+	public void setPhase( long phase )
 	{
 		this.phase = phase;
 	}
-	
+
 	public long getPhase()
 	{
 		return phase;
 	}
-	
+
 	private class Frame implements Cloneable
 	{
 		private Image image;
 		private long endTime;
-		
-		private Frame(Image image, long endTime)
+
+		private Frame( Image image, long endTime )
 		{
-			this.image = image;
+			this.image   = image;
 			this.endTime = endTime;
 		}
-		
+
 		@Override
 		public Frame clone()
 		{
-			return new Frame(image, endTime);
+			return new Frame( image, endTime );
 		}
 	}
 }
